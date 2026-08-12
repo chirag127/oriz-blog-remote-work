@@ -1,114 +1,74 @@
 ---
 import HeaderControls from '~/components/HeaderControls.tsx'
-import MultiSearch from '~/components/MultiSearch.tsx'
+import StatusBar from '~/components/StatusBar.astro'
 import StatusBanner from '~/components/StatusBanner.astro'
 /*
- * Header — editorial masthead bar ("Signal Press").
+ * Header — slim workspace utility bar (DASHBOARD/KANBAN shell).
  *
- *   ┌─────────────────────────────────────────────────────────────────┐
- *   │  oriz/blog        LATEST · SERIES · TAGS · ABOUT    ⌘K rss ··· │
- *   └─────────────────────────────────────────────────────────────────┘
+ *   ┌──────────────────────────────────────────────────────────────────┐
+ *   │ ● Off-Grid · workspace   [working · BLR 14:20 · LIS · SFO]   ⌘K … │
+ *   └──────────────────────────────────────────────────────────────────┘
  *
- * Left: serif wordmark. Center: mono uppercase nav with orange underline.
- * Right: search (⌘K), rss, ··· overflow. 64px, sticky, paper blur.
+ * NOT a magazine masthead: no centered LATEST/SERIES/TAGS/ABOUT link row.
+ * Left = brand mark. Middle = live availability status bar (the workspace's
+ * "who's here" indicator). Right = search/rss/overflow. 48px, sticky.
+ * All section navigation lives on the board (columns) + the overflow menu.
  */
 import Wordmark from '~/components/Wordmark.astro'
 ---
 
 <StatusBanner />
-<header class="site-header" transition:persist="site-header">
-  <div class="container-page header-inner">
-    <div class="brand">
-      <Wordmark subtitle="log" size={21} href="/" />
+<header class="deck-bar" transition:persist="deck-bar">
+  <div class="deck-bar-inner">
+    <div class="deck-brand">
+      <Wordmark subtitle="workspace" size={17} href="/" />
     </div>
-    <nav class="header-nav" aria-label="Primary">
-      <a href="/" aria-current={Astro.url.pathname === '/' ? 'page' : undefined}>Latest</a>
-      <a href="/series/" aria-current={Astro.url.pathname.startsWith('/series') ? 'page' : undefined}>Series</a>
-      <a href="/tags/" aria-current={Astro.url.pathname.startsWith('/tags') ? 'page' : undefined}>Tags</a>
-      <a href="/about/" aria-current={Astro.url.pathname.startsWith('/about') ? 'page' : undefined}>About</a>
-    </nav>
-    <div class="header-multisearch">
-      <MultiSearch client:idle />
+    <div class="deck-status">
+      <StatusBar />
     </div>
-    <div class="header-controls-mount">
+    <div class="deck-controls">
       <HeaderControls client:idle />
     </div>
   </div>
 </header>
 
 <style>
-  .site-header {
+  .deck-bar {
     position: sticky;
     top: 0;
     z-index: 50;
-    background: color-mix(in oklab, var(--paper) 90%, transparent);
-    backdrop-filter: saturate(180%) blur(10px);
-    -webkit-backdrop-filter: saturate(180%) blur(10px);
+    background: color-mix(in oklab, var(--paper) 88%, transparent);
+    backdrop-filter: saturate(160%) blur(10px);
+    -webkit-backdrop-filter: saturate(160%) blur(10px);
     border-bottom: 1px solid var(--rule);
   }
-  .header-inner {
-    height: 64px;
+  .deck-bar-inner {
+    height: 48px;
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
+    max-width: var(--container-page, 1100px);
+    margin-inline: auto;
+    padding-inline: clamp(0.75rem, 3vw, 1.5rem);
   }
-  .brand {
+  .deck-brand {
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
   }
-  .header-nav {
+  .deck-status {
+    flex: 1 1 auto;
     display: none;
-    gap: 1.5rem;
-    font-family: var(--font-utility, var(--font-mono));
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-muted);
+    justify-content: center;
+    min-width: 0;
   }
-  .header-nav a {
-    position: relative;
-    padding-block: 0.375rem;
-    color: var(--color-muted);
-    text-decoration: none;
-    transition: color var(--dur-fast, 120ms) ease;
+  @media (min-width: 860px) {
+    .deck-status { display: inline-flex; }
   }
-  .header-nav a:hover {
-    color: var(--color-accent);
-  }
-  .header-nav a::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 2px;
-    background: var(--color-accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--dur-fast, 120ms) ease;
-  }
-  .header-nav a:hover::after,
-  .header-nav a[aria-current='page']::after {
-    transform: scaleX(1);
-  }
-  .header-nav a[aria-current='page'] {
-    color: var(--color-accent);
-  }
-  @media (min-width: 768px) {
-    .header-nav { display: inline-flex; align-items: center; }
-  }
-  .header-controls-mount {
+  .deck-controls {
+    flex: 0 0 auto;
     margin-left: auto;
     display: inline-flex;
     align-items: center;
-  }
-  .header-multisearch {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-  }
-  .header-multisearch + .header-controls-mount {
-    margin-left: 0.75rem;
   }
 </style>

@@ -1,0 +1,133 @@
+---
+/*
+ * StatusBar — compact toolbar variant of the signature timezone strip.
+ *
+ * Lives in the slim header (workspace utility bar). Same availability logic as
+ * TimezoneStrip (mint = working, amber = focus, grey = away) but flat + inline,
+ * no pill, sized for a 48px bar. Ticks client-side; meaningful server-side.
+ */
+
+type Zone = { city: string; tz: string; primary?: boolean }
+
+const zones: Zone[] = [
+  { city: 'BLR', tz: 'Asia/Kolkata', primary: true },
+  { city: 'LIS', tz: 'Europe/Lisbon' },
+  { city: 'SFO', tz: 'America/Los_Angeles' },
+]
+
+function timeIn(tz: string): { hhmm: string; hour: number } {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: tz,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date())
+  const h = parts.find((p) => p.type === 'hour')?.value ?? '00'
+  const m = parts.find((p) => p.type === 'minute')?.value ?? '00'
+  return { hhmm: `${h}:${m}`, hour: Number(h) }
+}
+
+function statusFor(hour: number): { key: string; label: string } {
+  if (hour >= 9 && hour < 18) return { key: 'working', label: 'working' }
+  if (hour >= 18 && hour < 23) return { key: 'focus', label: 'in focus' }
+  return { key: 'away', label: 'away' }
+}
+
+const primary = zones.find((z) => z.primary) ?? zones[0]
+const primaryTime = timeIn(primary.tz)
+const status = statusFor(primaryTime.hour)
+const rendered = zones.map((z) => ({ ...z, ...timeIn(z.tz) }))
+---
+
+<div class="sbar" data-status={status.key} role="status" aria-label={`Status: ${status.label} in ${primary.city}`}>
+  <span class="sbar-dot" aria-hidden="true"></span>
+  <span class="sbar-state mono">{status.label}</span>
+  <span class="sbar-div" aria-hidden="true"></span>
+  {rendered.map((z, i) => (
+    <>
+      {i > 0 && <span class="sbar-sep mono" aria-hidden="true">·</span>}
+      <span class="sbar-clock mono" data-tz={z.tz} class:list={[{ 'is-primary': z.primary }]}>
+        <span class="sbar-city">{z.city}</span>
+        <span class="sbar-time">{z.hhmm}</span>
+      </span>
+    </>
+  ))}
+</div>
+
+<script>
+  function fmt(tz: string) {
+    const p = new Intl.DateTimeFormat('en-GB', {
+      timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false,
+    }).formatToParts(new Date())
+    const h = p.find((x) => x.type === 'hour')?.value ?? '00'
+    const m = p.find((x) => x.type === 'minute')?.value ?? '00'
+    return { hhmm: `${h}:${m}`, hour: Number(h) }
+  }
+  function statusKey(hour: number) {
+    if (hour >= 9 && hour < 18) return ['working', 'working']
+    if (hour >= 18 && hour < 23) return ['focus', 'in focus']
+    return ['away', 'away']
+  }
+  function tick() {
+    document.querySelectorAll<HTMLElement>('.sbar').forEach((bar) => {
+      let primaryHour = 0
+      bar.querySelectorAll<HTMLElement>('.sbar-clock').forEach((clock) => {
+        const tz = clock.dataset.tz
+        if (!tz) return
+        const { hhmm, hour } = fmt(tz)
+        const t = clock.querySelector('.sbar-time')
+        if (t) t.textContent = hhmm
+        if (clock.classList.contains('is-primary')) primaryHour = hour
+      })
+      const [key, label] = statusKey(primaryHour)
+      bar.dataset.status = key
+      const l = bar.querySelector('.sbar-state')
+      if (l) l.textContent = label
+    })
+  }
+  tick()
+  const ms = (60 - new Date().getSeconds()) * 1000
+  setTimeout(() => { tick(); setInterval(tick, 60_000) }, ms)
+</script>
+
+<style>
+  .sbar {
+    --st: var(--mist-mute);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 12px;
+    line-height: 1;
+    color: var(--ink-mute);
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .sbar[data-status='working'] { --st: var(--live); }
+  .sbar[data-status='focus'] { --st: var(--signal); }
+  .sbar[data-status='away'] { --st: var(--mist-mute); }
+  .sbar-dot {
+    width: 8px; height: 8px; border-radius: 999px; background: var(--st); flex: 0 0 auto;
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--st) 60%, transparent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sbar[data-status='working'] .sbar-dot,
+    .sbar[data-status='focus'] .sbar-dot {
+      animation: sbar-ping 2.6s var(--ease-out, ease-out) infinite;
+    }
+  }
+  @keyframes sbar-ping {
+    0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--st) 55%, transparent); }
+    70% { box-shadow: 0 0 0 6px color-mix(in oklab, var(--st) 0%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--st) 0%, transparent); }
+  }
+  .sbar-state {
+    color: var(--st); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; font-size: 10px;
+  }
+  .sbar-div { width: 1px; height: 14px; background: var(--rule); flex: 0 0 auto; }
+  .sbar-clock { display: inline-flex; align-items: baseline; gap: 0.3rem; letter-spacing: 0.02em; }
+  .sbar-clock.is-primary { color: var(--ink); }
+  .sbar-city { font-size: 9.5px; letter-spacing: 0.14em; color: var(--ink-mute); }
+  .sbar-clock.is-primary .sbar-city { color: var(--st); }
+  .sbar-time { font-variant-numeric: tabular-nums; }
+  .sbar-sep { color: var(--rule-strong); }
+</style>

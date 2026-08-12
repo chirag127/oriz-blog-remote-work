@@ -1,66 +1,27 @@
 ---
 /*
- * blog-app Footer — "Signal Press" editorial surface.
+ * Off-Grid Footer — compact workspace strip (DASHBOARD/KANBAN shell).
  *
- * Signature element: a serif pull-quote (Source Serif 4) with a signal-orange
- * quote mark — the only place the footer raises its voice. Everything else
- * stays library-quiet: mono column headings, mono tag links, hairline rules.
- *
- * Reads palette + type from the editorial tokens (tokens.css / global.css).
+ * NOT a 4-column magazine footer. One quiet horizontal bar: the workspace
+ * "sign-off" line (live-dot + one plain-spoken line) on the left, a flat inline
+ * link rail on the right (board-lane shortcuts + rss). Legal footer below.
  */
 import LegalFooter from '~/components/chrome/legal/LegalFooter.astro'
-import {
-  getCategoriesWithCounts,
-  getTagsWithCounts,
-  slugifyTag,
-} from '~/lib/blog'
-
-const categories = [
-  { name: 'All categories', slug: '' },
-  ...(await getCategoriesWithCounts()).slice(0, 6).map(({ category }) => ({
-    name: category,
-    slug: slugifyTag(category),
-  })),
-]
-const tags = (await getTagsWithCounts()).slice(0, 8).map(({ tag }) => tag)
 ---
-<footer class="blog-footer" role="contentinfo">
-  <div class="bf-quote">
-    <blockquote>
-      <span aria-hidden="true" class="bf-q-mark">“</span>
+<footer class="deck-foot" role="contentinfo">
+  <div class="deck-foot-inner">
+    <p class="deck-foot-sign">
+      <span class="deck-foot-dot" aria-hidden="true"></span>
       The work travels. The desk doesn't have to.
-    </blockquote>
-    <p class="bf-quote-attr">— Off-Grid</p>
-  </div>
-  <div class="bf-grid">
-    <div class="bf-col">
-      <h3 class="bf-h">Categories</h3>
-      <ul>
-        {categories.map((c) => <li><a href={c.slug ? `/categories/${c.slug}/` : '/categories/'}>{c.name}</a></li>)}
-      </ul>
-    </div>
-    <div class="bf-col">
-      <h3 class="bf-h">Recent</h3>
-      <ul>
-        <li><a href="/blog/">Latest posts</a></li>
-        <li><a href="/archive/">Archive</a></li>
-        <li><a href="/archive/">All posts</a></li>
-        <li><a href="/now/">Now</a></li>
-      </ul>
-    </div>
-    <div class="bf-col">
-      <h3 class="bf-h">Tags</h3>
-      <ul class="bf-tags">
-        {tags.map((t) => <li><a href={`/tags/${slugifyTag(t)}/`}>#{t}</a></li>)}
-      </ul>
-    </div>
-    <div class="bf-col">
-      <h3 class="bf-h">Series</h3>
-      <ul>
-        <li><a href="/series/">Browse series</a></li>
-        <li><a href="/blog/">Latest threads</a></li>
-      </ul>
-    </div>
+    </p>
+    <nav class="deck-foot-nav" aria-label="Footer">
+      <a href="/blog/">Log</a>
+      <a href="/series/">Series</a>
+      <a href="/tags/">Topics</a>
+      <a href="/now/">Now</a>
+      <a href="/about/">About</a>
+      <a href="/rss.xml" class="deck-foot-rss mono">rss</a>
+    </nav>
   </div>
   <LegalFooter
     github="https://github.com/chirag127/oriz-blog-remote-work"
@@ -70,47 +31,51 @@ const tags = (await getTagsWithCounts()).slice(0, 8).map(({ tag }) => tag)
   />
 </footer>
 <style>
-  .blog-footer {
-    margin-top: 5rem;
-    background: var(--color-paper-2, var(--paper-2, transparent));
-    color: var(--color-ink, var(--ink));
-    border-top: 1px solid var(--color-rule, var(--rule));
+  .deck-foot {
+    margin-top: 4rem;
+    background: var(--paper-2);
+    color: var(--ink);
+    border-top: 1px solid var(--rule);
   }
-  .bf-quote {
-    max-width: 1200px; margin: 0 auto;
-    padding: 48px 16px 24px;
-    text-align: left;
+  .deck-foot-inner {
+    max-width: var(--container-page, 1100px);
+    margin: 0 auto;
+    padding: 1.5rem clamp(0.75rem, 3vw, 1.5rem);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    border-bottom: 1px solid var(--rule);
   }
-  .bf-quote blockquote {
+  .deck-foot-sign {
     margin: 0;
-    font-family: var(--font-display, 'Source Serif 4', Georgia, serif);
-    font-style: normal; font-weight: 600; font-size: clamp(22px, 3.2vw, 30px);
-    line-height: 1.3; letter-spacing: -0.015em;
-    color: var(--color-ink, var(--ink)); max-width: 560px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--font-display, 'Fraunces', Georgia, serif);
+    font-weight: 560;
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    letter-spacing: -0.01em;
+    color: var(--ink);
   }
-  .bf-q-mark { font-size: 1.5em; line-height: 0; color: var(--color-accent, var(--cobalt, #e63a1f)); margin-right: 4px; }
-  .bf-quote-attr {
-    margin: 16px 0 0; font-family: var(--font-mono, ui-monospace);
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em;
-    color: var(--color-ink-mute, var(--ink-mute));
+  .deck-foot-dot {
+    width: 9px; height: 9px; border-radius: 999px; background: var(--live); flex: 0 0 auto;
   }
-  .bf-grid {
-    max-width: 1200px; margin: 0 auto;
-    display: grid; grid-template-columns: 1fr; gap: 24px;
-    padding: 12px 16px 24px;
+  .deck-foot-nav {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
   }
-  .bf-h {
-    margin: 0 0 14px;
+  .deck-foot-nav a {
     font-family: var(--font-mono, ui-monospace);
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em;
-    color: var(--color-ink-mute, var(--ink-mute)); font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    text-decoration: none;
   }
-  .bf-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
-  .bf-col a { color: var(--color-ink, var(--ink)); font-size: 14px; text-decoration: none; }
-  .bf-col a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-  .bf-tags { flex-direction: row; flex-wrap: wrap; gap: 8px 12px; }
-  .bf-tags a { font-family: var(--font-mono, ui-monospace); font-size: 13px; color: var(--color-ink-mute, var(--ink-mute)); }
-  .bf-tags a:hover { color: var(--color-accent, var(--cobalt, #e63a1f)); text-decoration: none; }
-  @media (min-width: 768px) { .bf-grid { grid-template-columns: 1fr 1fr; gap: 32px; padding: 16px 24px 28px; } .bf-quote { padding: 64px 24px 20px; } }
-  @media (min-width: 1024px) { .bf-grid { grid-template-columns: repeat(4, 1fr); padding: 16px 24px 32px; } }
+  .deck-foot-nav a:hover { color: var(--accent); }
+  .deck-foot-rss { text-transform: lowercase; letter-spacing: 0.04em; color: var(--signal); }
 </style>
