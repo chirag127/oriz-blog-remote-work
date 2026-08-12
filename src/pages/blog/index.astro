@@ -1,10 +1,11 @@
 ---
+import AsyncWorklog from '~/components/AsyncWorklog.astro'
 import PostCard from '~/components/blog/PostCard.astro'
 /**
  * /blog — page 1 of the paginated blog index.
  * Pages 2+ live at /blog/page/[page] (see ./page/[page].astro).
  *
- * Layout: filter strip of every category, then a ruled dispatch ledger.
+ * Layout: AsyncWorklog dispatch log strip, filter strip, then a ruled ledger.
  */
 import BaseLayout from '~/layouts/BaseLayout.astro'
 import { getAllCategories, getPublishedPosts, slugifyTag } from '~/lib/blog'
@@ -45,6 +46,10 @@ const jsonLd = {
       </p>
     </header>
 
+    {posts.length > 0 && (
+      <AsyncWorklog posts={allPosts} limit={5} />
+    )}
+
     {categories.length > 0 && (
       <nav class="desk-strip mono" aria-label="Filter posts by category">
         <a class="desk is-active" href="/blog/">All</a>
@@ -58,9 +63,9 @@ const jsonLd = {
       <p class="muted">No posts yet — the first one drops shortly.</p>
     ) : (
       <ul class="post-list">
-        {posts.map((p) => (
+        {posts.map((p, i) => (
           <li>
-            <PostCard post={p} />
+            <PostCard post={p} index={i} />
           </li>
         ))}
       </ul>

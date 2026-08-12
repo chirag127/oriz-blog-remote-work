@@ -1,0 +1,207 @@
+---
+/**
+ * AsyncWorklog — bespoke signature element for Off-Grid (remote-work blog).
+ *
+ * Renders a vertical dispatch log strip: posts displayed as async work
+ * log entries. Each row shows a "channel" indicator (doc / async / sync /
+ * client), a priority dot, the title, and a sent-at time. Like a Slack/Linear
+ * notification feed but for blog posts — the remote worker's canonical UI.
+ *
+ * Used on the blog index page above the post list as the signature module
+ * that makes this site unmistakably "remote work".
+ */
+import type { CollectionEntry } from 'astro:content'
+import { formatPostDate, postVertical } from '~/lib/blog'
+
+export interface Props {
+  posts: CollectionEntry<'blog'>[]
+  /** Max rows to show (default 5). */
+  limit?: number
+}
+
+const { posts, limit = 5 } = Astro.props
+const entries = posts.slice(0, limit)
+
+// Map vertical → channel metaphor
+function channel(vert: string): { label: string; icon: string } {
+  if (vert === 'dev') return { label: 'tools', icon: '⌨' }
+  if (vert === 'finance') return { label: 'invoice', icon: '₹' }
+  if (vert === 'culture') return { label: 'async', icon: '⇄' }
+  if (vert === 'health') return { label: 'life', icon: '◎' }
+  return { label: 'client', icon: '↗' }
+}
+---
+
+<section class="worklog" aria-label="Latest dispatches">
+  <header class="worklog-head">
+    <span class="worklog-label mono">dispatch log</span>
+    <span class="worklog-count mono">{posts.length} entries</span>
+  </header>
+  <ol class="worklog-list" reversed>
+    {entries.map((p, i) => {
+      const vert = postVertical(p)
+      const ch = channel(vert)
+      return (
+        <li class="worklog-row" data-vertical={vert}>
+          <span class="worklog-index mono" aria-hidden="true">{String(entries.length - i).padStart(2, '0')}</span>
+          <span class="worklog-channel mono" aria-label={`Channel: ${ch.label}`}>
+            <span class="worklog-icon" aria-hidden="true">{ch.icon}</span>
+            <span class="worklog-chan-name">{ch.label}</span>
+          </span>
+          <a class="worklog-entry" href={`/blog/${p.id}`}>
+            <span class="worklog-title">{p.data.title}</span>
+            <time class="worklog-time mono" datetime={p.data.pubDate.toISOString()}>
+              {formatPostDate(p.data.pubDate)}
+            </time>
+          </a>
+          <span class="worklog-status" aria-hidden="true"></span>
+        </li>
+      )
+    })}
+  </ol>
+  <a class="worklog-all mono" href="/archive/">view full log →</a>
+</section>
+
+<style>
+  .worklog {
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-card, 12px);
+    background: color-mix(in oklab, var(--paper-2) 60%, transparent);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .worklog-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid var(--rule);
+    background: color-mix(in oklab, var(--paper-2) 80%, transparent);
+  }
+  .worklog-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .worklog-count {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--live);
+    border: 1px solid color-mix(in oklab, var(--live) 40%, var(--rule));
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+  }
+
+  .worklog-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .worklog-row {
+    --v: var(--v-personal);
+    display: grid;
+    grid-template-columns: 2ch 7ch 1fr auto;
+    align-items: center;
+    gap: 0 0.75rem;
+    padding: 0.55rem 0.875rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--rule) 60%, transparent);
+    position: relative;
+  }
+  .worklog-row:last-child { border-bottom: 0; }
+  .worklog-row[data-vertical='dev'] { --v: var(--v-dev); }
+  .worklog-row[data-vertical='finance'] { --v: var(--v-finance); }
+  .worklog-row[data-vertical='culture'] { --v: var(--v-culture); }
+  .worklog-row[data-vertical='health'] { --v: var(--v-health); }
+
+  .worklog-index {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: var(--ink-mute);
+    font-variant-numeric: tabular-nums;
+    opacity: 0.55;
+  }
+
+  .worklog-channel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--v);
+    white-space: nowrap;
+  }
+  .worklog-icon {
+    font-size: 10px;
+    font-style: normal;
+    line-height: 1;
+  }
+  .worklog-chan-name { font-weight: 500; }
+
+  .worklog-entry {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    flex-wrap: wrap;
+    min-width: 0;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .worklog-entry:hover .worklog-title { color: var(--v); }
+
+  .worklog-title {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1 1 0;
+    transition: color var(--dur-fast, 120ms) ease;
+  }
+
+  .worklog-time {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-mute);
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .worklog-status {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--v);
+    flex: 0 0 auto;
+    opacity: 0.7;
+  }
+
+  .worklog-all {
+    display: block;
+    padding: 0.5rem 0.875rem;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    text-decoration: none;
+    border-top: 1px solid var(--rule);
+    background: color-mix(in oklab, var(--paper-2) 80%, transparent);
+    transition: color var(--dur-fast, 120ms) ease;
+  }
+  .worklog-all:hover { color: var(--accent); }
+
+  /* Responsive: on narrow, drop channel column */
+  @media (max-width: 520px) {
+    .worklog-row {
+      grid-template-columns: 2ch 1fr auto;
+    }
+    .worklog-channel { display: none; }
+  }
+</style>
