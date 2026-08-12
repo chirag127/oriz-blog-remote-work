@@ -1,0 +1,111 @@
+---
+/*
+ * Wordmark — "Off-Grid" brand mark for oriz-blog-remote-work.
+ *
+ * A live availability dot (mint = online) precedes the name set in Fraunces
+ * display. The dot is the remote worker's identity object — the same status
+ * signal that opens the homepage timezone strip and every post row. It pulses
+ * twice on load (reduced-motion: static), never loops.
+ *
+ * Distinct from the oriz-blog "z-strike" serif wordmark by design — each site
+ * owns its mark.
+ */
+
+interface Props {
+  /** Sub-section name — rendered after a middot separator. */
+  subtitle?: string
+  /** Display size in CSS pixels. */
+  size?: number
+  /** Wrap the mark in an <a href="/">. */
+  href?: string | null
+  /** Render as <h1> (the masthead) rather than <div>. */
+  asHeading?: boolean
+}
+
+const { subtitle, size = 96, href = null, asHeading = false } = Astro.props
+const Tag = asHeading ? 'h1' : ('div' as const)
+const label = subtitle ? `Off-Grid · ${subtitle}` : 'Off-Grid'
+---
+
+{
+  href ? (
+    <a class="wordmark-link" href={href} aria-label={label}>
+      <Tag class="wordmark" style={`--wm-size: ${size}px;`}>
+        <span class="wordmark-dot" aria-hidden="true" />
+        <span class="wordmark-name">Off-Grid</span>
+        {subtitle && (
+          <>
+            <span class="wordmark-sep" aria-hidden="true">·</span>
+            <span class="wordmark-sub">{subtitle}</span>
+          </>
+        )}
+      </Tag>
+    </a>
+  ) : (
+    <Tag class="wordmark" style={`--wm-size: ${size}px;`}>
+      <span class="wordmark-dot" aria-hidden="true" />
+      <span class="wordmark-name">Off-Grid</span>
+      {subtitle && (
+        <>
+          <span class="wordmark-sep" aria-hidden="true">·</span>
+          <span class="wordmark-sub">{subtitle}</span>
+        </>
+      )}
+    </Tag>
+  )
+}
+
+<style>
+  .wordmark-link {
+    display: inline-block;
+    color: inherit;
+    text-decoration: none;
+  }
+  .wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.34em;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--wm-size, 96px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .wordmark-dot {
+    align-self: center;
+    width: 0.42em;
+    height: 0.42em;
+    border-radius: 999px;
+    background: var(--live);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--live) 70%, transparent);
+    flex: 0 0 auto;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .wordmark-dot {
+      animation: wm-ping 2.4s var(--ease-out, ease-out) 2;
+    }
+  }
+  @keyframes wm-ping {
+    0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--live) 65%, transparent); }
+    70% { box-shadow: 0 0 0 0.5em color-mix(in oklab, var(--live) 0%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--live) 0%, transparent); }
+  }
+  .wordmark-name {
+    font-optical-sizing: auto;
+    font-variation-settings: "opsz" 40, "SOFT" 30;
+  }
+  .wordmark-sep {
+    color: var(--ink-mute);
+    font-weight: 400;
+  }
+  .wordmark-sub {
+    color: var(--signal);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.5em;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+  }
+</style>

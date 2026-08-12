@@ -1,0 +1,85 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro'
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Chirag Singhal',
+  url: 'https://oriz.in/about/',
+  jobTitle: 'Software Engineer',
+  description:
+    'Software engineer specializing in scalable backend architectures, full-stack development, AI agents, and cloud-native deployments.',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Bhubaneswar',
+    addressRegion: 'Odisha',
+    addressCountry: 'IN',
+  },
+  sameAs: [
+    'https://github.com/chirag127',
+    'https://x.com/chirag127',
+    'https://linkedin.com/in/chirag127',
+  ],
+}
+---
+
+<BaseLayout
+  title="About — Off-Grid"
+  description="About Off-Grid — a remote work and freelancing log by Chirag Singhal, based in Bhubaneswar."
+  jsonLd={jsonLd}
+  hideSidebar={true}
+>
+  <header class="page-head">
+    <p class="eyebrow"><a href="/">Off-Grid</a> / About</p>
+    <h1>About</h1>
+  </header>
+
+  <article class="prose">
+    <p class="lede">
+      I'm Chirag Singhal — a software engineer who has spent years working
+      remotely and taking on freelance projects. Off-Grid is where I write
+      down what actually works when your office is wherever your laptop is.
+    </p>
+
+    <h2>What gets posted here</h2>
+    <p>
+      Five desks: <strong>Focus</strong> (the room and the habits that protect
+      deep work), <strong>Clients</strong> (finding, pitching, and keeping
+      them), <strong>Async</strong> (communication and process across time
+      zones), <strong>Money</strong> (rates, invoicing, and getting paid), and
+      <strong>Life</strong> (boundaries and not burning out). The common
+      thread: things I've actually tried, not repackaged advice.
+    </p>
+
+    <h2>Why "Off-Grid"</h2>
+    <p>
+      Remote work sounds like freedom and often turns into being reachable
+      everywhere, always. This log is about the opposite — building a way of
+      working where the work travels but you get to close the door, log off,
+      and be unreachable on purpose.
+    </p>
+    <p>
+      It's part of the <a href="https://oriz.in">oriz</a> family of sites: useful,
+      free, and quiet. No newsletters you didn't ask for. No popups. No paid tier.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Email: <a href="mailto:whyiswhen@gmail.com">whyiswhen@gmail.com</a>.
+      Or use the <a href="/contact/">contact form</a>.
+    </p>
+  </article>
+</BaseLayout>
+
+<style>
+  .page-head { padding-block: 3rem 1.5rem; border-bottom: 1px solid var(--color-border); max-width: var(--container-prose, 720px); margin-inline: auto; }
+  .eyebrow { color: var(--color-fg-muted); font-size: 0.8125rem; margin: 0 0 0.5rem; }
+  .eyebrow a { color: var(--color-fg-muted); text-decoration: none; }
+  .eyebrow a:hover { color: var(--color-fg); }
+  h1 { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+  .prose { padding-block: 2.5rem 4rem; color: var(--color-prose); line-height: 1.75; font-size: 1.0625rem; max-width: var(--container-prose, 720px); margin-inline: auto; }
+  .prose .lede { font-size: 1.1875rem; color: var(--color-fg); margin: 0 0 2rem; }
+  .prose h2 { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 600; color: var(--color-fg); margin: 2.5rem 0 1rem; }
+  .prose p { margin: 0 0 1.25rem; }
+  .prose a { color: var(--color-accent); }
+</style>
